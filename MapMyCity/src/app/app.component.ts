@@ -1,14 +1,13 @@
 import { Component, AfterViewInit } from '@angular/core';
 
-declare const L: any;
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit {
-  map: any;
+  map!: google.maps.Map;
+  infoWindow!: google.maps.InfoWindow;
 
   countries = [
     {
@@ -71,30 +70,34 @@ export class AppComponent implements AfterViewInit {
   ];
 
   ngAfterViewInit(): void {
-    this.map = L.map('map').setView([20.0, 77.0], 2.5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(this.map);
-  }
+    this.map = new google.maps.Map(document.getElementById('map') as HTMLElement, {
+      center: { lat: 20, lng: 77 },
+      zoom: 3
+    });
 
-  onCountrySelect(country: any) {
-    // Just for triggering re-render
+    this.infoWindow = new google.maps.InfoWindow();
   }
 
   onCapitalSelect(capital: any) {
     if (capital.selected) {
-      L.marker([capital.lat, capital.lng])
-        .addTo(this.map)
-        .bindPopup(`<b>${capital.name}</b><br>${capital.knownFor}`)
-        .openPopup();
+      const marker = new google.maps.Marker({
+        position: { lat: capital.lat, lng: capital.lng },
+        map: this.map,
+        title: capital.name
+      });
+
+      marker.addListener('click', () => {
+        this.infoWindow.setContent(`<b>${capital.name}</b><br>${capital.knownFor}`);
+        this.infoWindow.open(this.map, marker);
+      });
     }
   }
 
   goToCapital(capital: any) {
-    this.map.setView([capital.lat, capital.lng], 6);
-    L.popup()
-      .setLatLng([capital.lat, capital.lng])
-      .setContent(`<b>${capital.name}</b><br>${capital.knownFor}`)
-      .openOn(this.map);
+    this.map.setZoom(6);
+    this.map.setCenter({ lat: capital.lat, lng: capital.lng });
+    this.infoWindow.setContent(`<b>${capital.name}</b><br>${capital.knownFor}`);
+    this.infoWindow.setPosition({ lat: capital.lat, lng: capital.lng });
+    this.infoWindow.open(this.map);
   }
 }
