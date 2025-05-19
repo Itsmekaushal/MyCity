@@ -1,4 +1,5 @@
 import { Component, AfterViewInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -6,76 +7,24 @@ import { Component, AfterViewInit } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements AfterViewInit {
+  countries: any[] = [];
   map!: google.maps.Map;
   infoWindow!: google.maps.InfoWindow;
 
-  countries = [
-    {
-      id: 'IN',
-      name: 'India',
-      selected: false,
-      states: [
-        {
-          name: 'Maharashtra',
-          capitals: [
-            {
-              name: 'Mumbai',
-              lat: 19.076,
-              lng: 72.8777,
-              selected: false,
-              knownFor: 'Bollywood'
-            }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'US',
-      name: 'United States',
-      selected: false,
-      states: [
-        {
-          name: 'California',
-          capitals: [
-            {
-              name: 'Sacramento',
-              lat: 38.575764,
-              lng: -121.478851,
-              selected: false,
-              knownFor: 'Tech industry'
-            }
-          ]
-        }
-      ]
-    },
-    {
-      id: 'FR',
-      name: 'France',
-      selected: false,
-      states: [
-        {
-          name: 'Île-de-France',
-          capitals: [
-            {
-              name: 'Paris',
-              lat: 48.8566,
-              lng: 2.3522,
-              selected: false,
-              knownFor: 'Eiffel Tower'
-            }
-          ]
-        }
-      ]
-    }
-  ];
+  constructor(private http: HttpClient) {}
 
   ngAfterViewInit(): void {
     this.map = new google.maps.Map(document.getElementById('map') as HTMLElement, {
       center: { lat: 20, lng: 77 },
       zoom: 3
     });
-
     this.infoWindow = new google.maps.InfoWindow();
+  }
+
+  ngOnInit(): void {
+    this.http.get<any[]>('assets/countries.json').subscribe(data => {
+      this.countries = data;
+    });
   }
 
   onCapitalSelect(capital: any) {
