@@ -1,33 +1,46 @@
-<div class="flex-container">
-  <!-- Left: Google Map -->
-  <div class="map-container">
-    <div id="map"></div>
+<div class="map-container">
+  <div style="flex: 2;">
+    <google-map
+      height="100%"
+      width="100%"
+      [center]="center"
+      [zoom]="zoom"
+    >
+      <map-marker
+        *ngFor="let marker of displayMarkers()"
+        [position]="marker.position"
+        [title]="marker.title"
+        (mapClick)="openInfoWindow(markerRef, marker)"
+        #markerRef
+      >
+      </map-marker>
+
+      <map-info-window *ngIf="selectedMarker">
+        <strong>{{ selectedMarker.title }}</strong><br />
+        <small>{{ selectedMarker.description }}</small>
+      </map-info-window>
+    </google-map>
   </div>
 
-  <!-- Right: Country/State/Capital List -->
-  <div class="sidebar">
-    <h2>Select Countries</h2>
-    <div *ngFor="let country of countries">
+  <div style="flex: 1; padding: 10px; overflow-y: auto;">
+    <div *ngFor="let country of locationData">
       <label>
-        <input type="checkbox" [(ngModel)]="country.selected" />
-        {{ country.name }} ({{ country.id }})
+        <input
+          type="checkbox"
+          [(ngModel)]="country.selected"
+          (change)="onCountryToggle(country)"
+        />
+        {{ country.country }}
       </label>
-
-      <div *ngIf="country.selected" class="state-list">
-        <div *ngFor="let state of country.states">
-          <strong>{{ state.name }}</strong>
-          <ul>
-            <li *ngFor="let capital of state.capitals">
-              <label>
-                <input type="checkbox" [(ngModel)]="capital.selected" (change)="onCapitalSelect(capital)" />
-                {{ capital.name }}
-              </label>
-              <span class="clickable" (click)="goToCapital(capital)">
-                ({{ capital.knownFor }})
-              </span>
-            </li>
-          </ul>
-        </div>
+      <div *ngFor="let city of country.cities" style="margin-left: 10px;">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="city.selected"
+            (change)="onCityToggle(city, country)"
+          />
+          {{ city.name }}
+        </label>
       </div>
     </div>
   </div>
